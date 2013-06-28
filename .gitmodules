@@ -1,0 +1,3 @@
+[submodule "scripts/java/j3mifier"]
+	path = scripts/java/j3mifier
+	url = git@github.com:harlo/j3mifier.git
