@@ -16,6 +16,9 @@ class Source(Asset):
 				
 		super(Source, self).__init__(inflate, _id)
 		
+		if hasattr(self, 'invalid'):
+			return
+		
 		if hasattr(self, 'asset_path'):
 			pass
 		else:
