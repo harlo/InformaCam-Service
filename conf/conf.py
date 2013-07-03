@@ -33,7 +33,7 @@ repositories = [
 	},
 	{
 		'source': 'globaleaks',
-		'asset_root': 'something linking your GL repo'
+		'asset_root': 'TBD'	# don't use this yet.
 	}
 
 ]
