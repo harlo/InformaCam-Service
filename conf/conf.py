@@ -1,6 +1,7 @@
 conf = "/where/you/put/your/conf/files/"
 assets_root = "/where/you/put/your/submitted/assets/"
 gnupg_home = '/where/you/want/gpg/to/be/'
+forms_root = "/where/you/put/your/javarosa/forms/"
 
 scripts_home = {
 	"python" : '/where/you/put/your/py/scripts/'
@@ -19,6 +20,27 @@ drive = {
 	"asset_root" : "folder_id_on_drive",
 	"absorbed_flag" : "absorbedByInformaCam"
 }
+
+organization_fingerprint = "PGP KEY FINGERPRING"
+organization_name = "WHO ARE YOU?"
+organization_details = "A blurb"
+public_key_path = '/where/is/your/public/key.asc'
+
+repositories = [
+	{
+		'source': 'google_drive',
+		'asset_root': drive['asset_root']
+	},
+	{
+		'source': 'globaleaks',
+		'asset_root': 'something linking your GL repo'
+	}
+
+]
+forms = [
+	'%a_form_you_made.xml' % forms_root,
+	'%another_form_you_made.xml' % forms_root
+]
 
 couch = {
 	"login" : "cdb_username:cdb_password",
@@ -47,4 +69,13 @@ invalidate = {
 		'submission_invalid_video' : "The video at %s is invalid or corrupted",
 		'access_denied' : "The user %s is attempting to access an asset beyond its permissions."
 	}
+}
+
+public = {
+	"organizationName" : organization_name,
+	"organizationDetails" : organization_details,
+	"organizationFingerprint" : organization_fingerprint,
+	"repositories": repositories,
+	"publicKey": public_key_path,
+	"forms": forms
 }
