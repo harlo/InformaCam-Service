@@ -2,6 +2,7 @@ import time, couchdb, base64
 
 from InformaCamUtils.couch import DB
 from InformaCamUtils.funcs import ShellReader
+from conf import invalidate
 
 __metaclass__ = type
 
@@ -31,7 +32,17 @@ class Asset():
 			
 		else:
 			print "getting by id %s" % _id
-	
+			
+			asset = self.db.get(_id)
+			
+			if asset is not None:
+				self.inflate(asset)
+			else:
+				self.invalid = {
+					"error_code": invalidate['codes']['asset_non_existent'],
+					"reason" : invalidate['reasons']['asset_non_existent']
+				}
+					
 	def makeDir(self, path):
 		ShellReader(["mkdir", path])
 		
@@ -58,7 +69,7 @@ class Asset():
 		self.db.put(self._id, self._rev, self.emit())
 		
 	def invalidate(self, error_code, reason):
-		self.invalidate = {
+		self.invalid = {
 			"error_code" : error_code,
 			"reason" : reason
 		}
