@@ -4,7 +4,7 @@ import tornado.ioloop
 import tornado.web
 import tornado.httpserver
 
-from conf import scripts_home, public
+from conf import scripts_home, public, invalidate
 from base64 import b64encode
 
 class ServerResponse():
@@ -69,11 +69,13 @@ class Source(tornado.web.RequestHandler):
 		res = ServerResponse()
 		
 		if passesParameterFilter(source_id):
-			res.data = db.get(source_id, remove=['_rev','rt_'])
-			if res.data is not None:
+			source = ICSource(_id = source_id)
+			
+			if not hasattr(source, 'invalid'):
+				res.data = source.emit()
 				res.result = 200
 			else:
-				del res.data
+				res.reason = source.invalid
 		
 		self.write(res.emit())
 		
@@ -132,12 +134,14 @@ class Submission(tornado.web.RequestHandler):
 		res = ServerResponse()
 		
 		if passesParameterFilter(submission_id):
-			res.data = db.get(submission_id, remove=['_rev','rt_'])
-			if res.data is not None:
+			submission = ICSubmission(_id = submission_id)
+			
+			if not hasattr(submission, 'invalid'):
+				res.data = submission.emit()
 				res.result = 200
 			else:
-				del res.data
-		
+				res.reason = submission.invalid
+
 		self.write(res.emit())
 
 class PublicCredentials(tornado.web.RequestHandler):
