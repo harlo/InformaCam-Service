@@ -107,19 +107,33 @@ EOH;
 	include "layouts/container.php";
 });
 
+$app->get('/informacam/', function() {
+	$i_get = new IGet();
+	$i_get->setUrl("http://localhost:6666/public/");
+	$res = json_decode($i_get->perform());
+		
+	header('Content-disposition: attachment; filename=int-bar.ictd');
+	header('Content-type: application/octet-stream');
+
+	echo json_encode($res->data);
+});
+
 // THIS IS HORRIBLE!!!
 $app->get('/js/:file', function($file) {
 	echo file_get_contents('js/' . $file);
 });
 
+// THIS IS ALSO HORRIBLE!!!
 $app->get('/css/:file', function($file) {
 	echo file_get_contents('css/' . $file);
 });
 
+// THIS IS ALSO HORRIBLE!!!
 $app->get('/layouts/:file', function($file) {
 	echo file_get_contents('layouts/' . $file);
 });
 
+// THIS IS ALSO HORRIBLE!!!
 $app->get('/media/:path/:file/', function($path, $file) {
 	echo file_get_contents('/home/ubuntu/assets/submissions/' . $path . '/' . $file);
 });
