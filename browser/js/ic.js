@@ -1,8 +1,22 @@
 var response_dump;
+var registration;
 
 $(document).ready(function() {
-	
+	registration = $("#registration");
+	$("#qr_code").qrcode("http://ec2-54-235-36-217.compute-1.amazonaws.com/informacam/");
 });
+
+function showRegistration() {
+	if(registration.css('display') == 'none') {
+		registration.css('display', 'block');
+	} else {
+		registration.css('display', 'none');
+	}
+}
+
+function getRegistration() {
+	$("#load_registration").prop('src','/informacam/');
+}
 
 function setResponseDump(data) {
 	response_dump = $($("#response_dump").find('textarea')[0]);
