@@ -1,10 +1,11 @@
-import sys
+import sys, copy
 
 import tornado.ioloop
 import tornado.web
 import tornado.httpserver
 
-from conf import scripts_home
+from conf import scripts_home, public
+from base64 import b64encode
 
 class ServerResponse():
 	def __init__(self):
@@ -68,7 +69,7 @@ class Source(tornado.web.RequestHandler):
 		res = ServerResponse()
 		
 		if passesParameterFilter(source_id):
-			res.data = db.get(source_id)
+			res.data = db.get(source_id, remove=['_rev','rt_'])
 			if res.data is not None:
 				res.result = 200
 			else:
@@ -131,7 +132,7 @@ class Submission(tornado.web.RequestHandler):
 		res = ServerResponse()
 		
 		if passesParameterFilter(submission_id):
-			res.data = db.get(submission_id)
+			res.data = db.get(submission_id, remove=['_rev','rt_'])
 			if res.data is not None:
 				res.result = 200
 			else:
@@ -139,11 +140,22 @@ class Submission(tornado.web.RequestHandler):
 		
 		self.write(res.emit())
 
+class PublicCredentials(tornado.web.RequestHandler):
+	def get(self):
+		 """Returns the organization's public information, so users may submit data."""
+		 
+		 res = ServerResponse()
+		 res.result = 200
+		 res.data = public_credentials
+		 
+		 self.write(res.emit())
+
 routes = [
 	(r"/sources/", Sources),
 	(r"/source/(.*)/", Source, dict(source_id=None)),
 	(r"/submissions/", Submissions),
-	(r"/submission/(.*)/", Submission, dict(submission_id=None))
+	(r"/submission/(.*)/", Submission, dict(submission_id=None)),
+	(r"/public/", PublicCredentials)
 ]
 
 api = tornado.web.Application(routes)
@@ -152,14 +164,16 @@ if __name__ == "__main__":
 	sys.path.insert(0, scripts_home['python'])
 	from InformaCamModels.source import Source as ICSource
 	from InformaCamModels.submission import Submission as ICSubmission
-	from InformaCamUtils.funcs import parseRequest, parseArguments, passesParameterFilter
+	from InformaCamUtils.funcs import parseRequest, parseArguments, passesParameterFilter, gzipAsset
 	from InformaCamUtils.couch import DB
 	
 	db = DB()
+	public_credentials = copy.deepcopy(public)
+	public_credentials['publicKey'] = b64encode(gzipAsset(public['publicKey']))
+	for f, form in enumerate(public['forms']):
+		public_credentials['forms'][f] = b64encode(gzipAsset(form))
 	
 	server = tornado.httpserver.HTTPServer(api)
 	server.listen(6666)
 	
 	tornado.ioloop.IOLoop.instance().start()
-	
-	
