@@ -10,7 +10,7 @@ scripts_home = {
 file_salt = "YOU PUT UR SALT HERE"
 
 sync = [
-	'drive'
+	'drive', 'globaleaks'
 ]
 sync_sleep = 10	# minutes
 
@@ -19,6 +19,16 @@ drive = {
 	"p12" : "%syour-gdata-privatekey.p12" % conf,
 	"asset_root" : "folder_id_on_drive",
 	"absorbed_flag" : "absorbedByInformaCam"
+}
+
+globaleaks = {
+	"asset_root" : "/where/globaleaks/is/files/submission/",
+	"host" : "host url",
+	"user" : "user (ubuntu?)",
+	"identity_file" : "%sid_file_to_gl_server.pem" % conf,
+	"absorbed_log" : "absorbedByInformaCam_gl.json",
+	"absorbed_flag" : "absorbedByInformaCam",
+	"public_url" : "http://maybe_a.onion?"
 }
 
 organization_fingerprint = "PGP KEY FINGERPRING"
@@ -33,7 +43,7 @@ repositories = [
 	},
 	{
 		'source': 'globaleaks',
-		'asset_root': 'TBD'	# don't use this yet.
+		'asset_root': globaleaks['public_url']
 	}
 
 ]
