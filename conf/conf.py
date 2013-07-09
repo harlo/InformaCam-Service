@@ -68,13 +68,17 @@ api = {
 
 invalidate = {
 	'codes' : {
+		'asset_non_existent': 801,
 		'source_invalid_pgp_key' : 902,
+		'source_invalid_public_credentials' : 903,
 		'submission_invalid_image' : 900,
 		'submission_invalid_video' : 901,
 		'access_denied' : 800
 	},
 	'reasons' : {
+		'asset_non_existent': "The requested asset does not exist",
 		'source_invalid_pgp_key' : "The pgp key at %s is invalid or corrupted",
+		'source_invalid_public_credentials' : "One or more of the public credentials files are invalid or corrupted",
 		'submission_invalid_image' : "The image at %s is invalid or corrupted",
 		'submission_invalid_video' : "The video at %s is invalid or corrupted",
 		'access_denied' : "The user %s is attempting to access an asset beyond its permissions."
