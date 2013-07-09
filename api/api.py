@@ -46,13 +46,16 @@ class Sources(tornado.web.RequestHandler):
 		
 		if params is not None:
 			source = ICSource(inflate={'_id' : params['_id']})
-			if source.addFile(params['package_name'], params['package_content']):
+			if source.addFile(params['package_name'], params['package_content']):				
 				if source.importAssets(params['package_name']):
-
 					res.result = 200
 					res.data = source.emit()
 				else:
-					res.reason = source.invalidate
+					source.invalidate(
+						invalidate['codes']['source_invalid_public_credentials'],
+						invalidate['reasons']['source_invalid_public_credentials']
+					)
+					res.reason = source.invalid
 			
 		self.write(res.emit())
 				
@@ -117,7 +120,11 @@ class Submissions(tornado.web.RequestHandler):
 					res.result = 200
 					res.data = submission.emit()
 				else:
-					res.reason = submission.invalidate
+					submission.invalidate(
+						invalidate['codes']['asset_non_existent'],
+						invalidate['reasons']['asset_non_existent']
+					)
+					res.reason = submission.invalid
 		
 		self.write(res.emit())
 		
