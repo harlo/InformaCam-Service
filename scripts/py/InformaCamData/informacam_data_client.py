@@ -6,13 +6,15 @@ __metaclass__ = type
 mime_types = {
 	'text': "text/plain",
 	'zip' : "application/zip",
-	'image' : "image/jpeg"
+	'image' : "image/jpeg",
+	'video' : "video/mkv"
 }
 
 mime_type_map = {
 	'text/plain': "txt",
 	'application/zip': "zip",
-	'image/jpeg': "jpg"
+	'image/jpeg': "jpg",
+	'video/mkv': "mkv"
 }
 
 class InformaCamDataClient():
@@ -46,7 +48,7 @@ class InformaCamDataClient():
 			file (string or object)
 				usually an id for the file
 		"""
-		print "pulling file"
+		print "pulling file %s" % file
 		
 	def lockFile(self, file):
 		"""Makes the media on the repository unavailable to the public, if possible.
@@ -55,7 +57,7 @@ class InformaCamDataClient():
 			file (string or object)
 				usually an id for the file
 		"""
-		print "locking file"
+		print "locking file %s" % file
 		
 	def getFile(self, file_id):
 		"""Gets file's metadata from the repository.
@@ -73,7 +75,7 @@ class InformaCamDataClient():
 			file (string or object)
 				usually an id for the file
 		"""
-		print "absorbing file"
+		print "absorbing file %s" % file
 		
 	def isAbsorbed(self, file):
 		"""Determines whether a file has been absorbed by the server.
@@ -82,7 +84,7 @@ class InformaCamDataClient():
 			file (string or object)
 				usually an id for the file
 		"""
-		print "finding out if file is absorbed"
+		print "finding out if file is absorbed %s" % file
 		
 	def getAssetMimeType(self, file_id):
 		"""Gets the mime type of a file.
@@ -91,7 +93,7 @@ class InformaCamDataClient():
 			file (string or object)
 				usually an id for the file
 		"""
-		print "getting asset mime type"
+		print "getting asset mime type %s" % file_id
 		
 	def mapMimeTypeToExtension(self, mime_type):
 		print "mapping mime type to extension"
