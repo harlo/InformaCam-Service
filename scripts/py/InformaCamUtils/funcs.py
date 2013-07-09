@@ -1,5 +1,18 @@
 import sys, subprocess, os, cStringIO, pycurl, re, json
+import gzip
 from conf import api
+
+def gzipAsset(path_to_file):
+	_out = cStringIO.StringIO()
+	_in = open(path_to_file)
+	
+	z = gzip.GzipFile(fileobj=_out, mode='w')
+	z.write(_in.read())
+	
+	z.close()
+	_in.close()
+	
+	return _out.getvalue()
 
 def callApi(url, data=None, post=False):
 	url = "http://localhost:%d/%s/" % (api['port'], url)
@@ -103,18 +116,22 @@ def parseArguments(arguments):
 	return params
 
 def AsTrueValue(str_value):
-	if str_value.startswith("[") and str_value.endswith("]"):
-		vals = []
-		for v_ in str(str_value[1:-1]).split(","):
-			vals.append(AsTrueValue(v_))
+	try:
+		if str_value.startswith("[") and str_value.endswith("]"):
+			vals = []
+			for v_ in str(str_value[1:-1]).split(","):
+				vals.append(AsTrueValue(v_))
 
-		return vals
-	if str_value == "0":
-		return int(0)
-	if str_value == "true":
-		return True
-	if str_value == "false":
-		return False
+			return vals
+		if str_value == "0":
+			return int(0)
+		if str_value == "true":
+			return True
+		if str_value == "false":
+			return False
+	except AttributeError:
+		pass
+	
 	try:
 		if int(str_value):
 			return int(str_value)
