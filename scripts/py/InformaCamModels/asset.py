@@ -1,7 +1,7 @@
 import time, couchdb, base64
 
 from InformaCamUtils.couch import DB
-from InformaCamUtils.funcs import ShellReader
+from InformaCamUtils.funcs import ShellReader, AsTrueValue
 from conf import invalidate
 
 __metaclass__ = type
@@ -79,7 +79,10 @@ class Asset():
 		emit = {}
 		for key, value in self.__dict__.iteritems():
 			if not key in emit_omits:
-				emit[key] = value
+				if type(value) is unicode:
+					emit[key] = str(value)
+				else:
+					emit[key] = value
 			
 		return emit
 		
