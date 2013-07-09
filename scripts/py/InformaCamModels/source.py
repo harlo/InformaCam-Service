@@ -2,7 +2,7 @@ from asset import Asset, rt_
 from conf import gnupg_home, assets_root, invalidate
 from InformaCamUtils.funcs import ShellReader
 
-import gnupg
+import gnupg, json
 
 class Source(Asset):
 	def __init__(self, inflate=None, _id=None):
@@ -34,8 +34,23 @@ class Source(Asset):
 		])
 		self.importKey("%s/publicKey" % self.asset_path)
 		self.baseImage = "%s/baseImage" % self.asset_path
+		
+		c = open("%s/credentials" % self.asset_path, 'rb')
+		credentials = json.loads(c.read())
+		c.close()
+		
+		try:
+			self.alias = credentials['alias']
+		except:
+			pass
+			
+		try:
+			self.email = credentials['email']
+		except:
+			pass
 
 		self.save()
+		return True
 	
 	def importKey(self, path_to_key):
 		gpg = gnupg.GPG(gnupghome=gnupg_home)
