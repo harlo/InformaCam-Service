@@ -1,12 +1,4 @@
-InformaCam-Service
-==================
-
-new start for the InformaCam API, without server stuff, and with pulling from repositories
-
-Setup (on ubuntu):
-# let ~ represent wherever you want this root to be
 # Drive folders must be shared with the developer.gserviceaccount.com address prior
-
 update repos
 	sudo apt-get update
 	
@@ -20,7 +12,7 @@ mkdir ~/assets/submissions
 mkdir ~/couchdb
 
 install unzip
-	sudo apt-get install unzip
+	supdo apt-get install unzip
 
 installed git
 	sudo apt-get install git
@@ -36,11 +28,8 @@ installed drive sdk
 installed python-gnupg
 	easy_install python-gnupg
 
-installed pylockfile
-	wget https://pylockfile.googlecode.com/files/lockfile-0.9.1.tar.gz
-	tar -xvzf pylockfile
-	cd pylockfile
-	sudo python setup.py install
+installed python-fabric
+	easy_install fabric
 
 installed python-daemon
 	wget https://pypi.python.org/packages/source/p/python-daemon/python-daemon-1.6.tar.gz#md5=c774eda27d6c5d80b42037826d29e523
@@ -116,17 +105,29 @@ install ffmpeg
 	
 install ffmpeg2theora
 	sudo apt-get install ffmpeg2theora
-	
-have Svet install the j3mparser :)
-	
+		
 install web stuff
 	sudo apt-get install lighttpd
 	sudo apt-get install php5-cgi
 	sudo apt-get install php5-curl
-		
+
+install python-dev
+	sudo apt-get install python-dev
+	
+make aliases
+	vi ~/.bash_aliases
+	
+	alias cdb='sudo /usr/local/bin/couchdb couchdb'
+	alias goto_cdb='screen -r WHATEVER THAT SCREEN IS'
+	alias goto_api='screen -r WHATEVER THAT SCREEN IS'
+	alias goto_watcher='screen -r WHATEVER THAT SCREEN IS'
+	
 upload drive p12 to ~/conf
 upload client_secrets.json to ~/conf
 
 symlink ~/conf/conf.py to ~/scripts/py
-symlink ~/conf/conf.py to ~/api/
+symlink ~/conf/conf.py to ~/api/	
 
+pull api, j3mifier, and browser from git
+compile j3mifier
+move api package to wherever, scripts to wherever
