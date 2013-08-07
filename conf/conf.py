@@ -59,7 +59,7 @@ couch = {
 
 j3m = {
 	"root" : "/where/is/the/j3mifier/",
-	"classpath" : "%(j)sframework:%(j)sjars/*:%(j)sconf framework.MediaProcessor" % {'j' : '/where/is/the/j3mifier/'}
+	"classpath" : ".:%(j)sframework:%(j)sjars/*:%(j)sconf" % {'j' : '/where/is/the/j3mifier/'}
 }
 
 api = {
