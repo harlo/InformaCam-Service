@@ -6,7 +6,7 @@ sys.path.insert(0, "%sInformaCamUtils" % scripts_home['python'])
 from funcs import ShellReader
 
 class GlobaleaksClient(InformaCamDataClient):
-  def __init__(self):
+	def __init__(self):
 		super(GlobaleaksClient, self).__init__()
 		
 		os.chdir("%sInformaCamData" % scripts_home['python'])
@@ -54,12 +54,57 @@ class GlobaleaksClient(InformaCamDataClient):
 		
 		m = magic.Magic(flags=magic.MAGIC_MIME_TYPE)
 		mime_type = m.id_filename(os.path.join(os.getcwd(), fileId))
+		print "FILE MIME TYPE: %s" % mime_type
 		m.close()
 		
-		return mime_type
+		if mime_type == self.mime_types['wildcard']:
+			mime_type = self.validateMediaObject(fileId, returnType=True)
 		
-		return None
-	
+		return mime_type
+				
+	def validateMediaObject(self, fileId, returnType=False):
+		super(GlobaleaksClient, self).validateMediaObject(fileId,returnType)
+		
+		isValid = False
+		mime_type_found = None
+		
+		input = os.path.join(os.getcwd(), fileId)
+		output = "%s.log" % input[:-3]
+				
+		cmd = [
+			"fab",
+			"-f",
+			os.path.join(os.getcwd(),"ffmpeg_helper.py"),
+			"getInfo:input=%s,output=%s" % (input, output)
+		]
+		
+		ShellReader(cmd)
+		
+		input_0 = None
+		input_0_sentinel = "Input #0, "
+		
+		for line in open(output, 'r'):
+			input_0_location = line.find(input_0_sentinel)
+			
+			if input_0_location >= 0:
+				input_0 = line[(input_0_location + len(input_0_sentinel)):]
+				print input_0
+				if input_0.find("matroska") >= 0:
+					isValid = True
+					mime_type_found = self.mime_types['video']
+					break
+				elif input_0.find("image2") >= 0:
+					isValid = True
+					mime_type_found = self.mime_types['image']
+					break
+				
+		os.remove(output)
+		
+		if not returnType:
+			return isValid
+		else:
+			return mime_type_found
+		
 	def mapMimeTypeToExtension(self, mime_type):
 		super(GlobaleaksClient, self).mapMimeTypeToExtension(mime_type)
 		
@@ -100,6 +145,7 @@ class GlobaleaksClient(InformaCamDataClient):
 				files = line[len(sentinel) :].split("  ")
 				for file in files:
 					file = file.replace("\r","")
+										
 					if omit_absorbed and self.isAbsorbed(file):
 						continue
 						
