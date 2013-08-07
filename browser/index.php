@@ -60,7 +60,7 @@ $app->get('/submissions/', function() {
 	$layout->viz = <<<EOH
 	<table id="submissionList">
 		<tr>
-			<td><b>ID</b></td>
+			<td colspan="2"><b>ID</b></td>
 			<td><b>File Name</b></td>
 			<td colspan="2"><b>Date Admitted</b></td>
 		</tr>
@@ -95,12 +95,15 @@ $app->get('/submission/:submission_id/', function($submission_id) {
 	$i_get->setUrl("http://localhost:6666/submission/" . $submission_id . "/");
 	$dump = $i_get->perform();
 	
+	$d = json_decode($dump);
+	
 	$layout = new SimpleLayout($dump);
 	$layout->title = "Viewing Submission: " . $submission_id;
 	$layout->viz = <<<EOH
 	<div id="submissionList"></div>
 	<script>
 		render('{$dump}', 'submission', 'submissionList');
+		setJ3MDump('{$submission_id}/{$d->data->j3m}');
 	</script>
 EOH;
 	
@@ -113,9 +116,30 @@ $app->get('/informacam/', function() {
 	$res = json_decode($i_get->perform());
 		
 	header('Content-disposition: attachment; filename=int-bar.ictd');
-	header('Content-type: application/octet-stream');
+	header('Content-type: application/ictd');
 
 	echo json_encode($res->data);
+});
+
+// THIS WON'T BE NECESSARY
+$app->get('/documentation/', function() {
+	$layout = new SimpleLayout(null);
+	$layout->title = "InformaCam Documents";
+	
+	$doc_root = 'http://ec2-54-235-36-217.compute-1.amazonaws.com:8080';
+	$layout->viz = <<<EOH
+	<script>
+		$("#response_dump").css('display','none');
+	</script>
+	<ul>
+		<li><a href="{$doc_root}/api/html/index.html">Data API Docs</a></li>
+		<li><a href="{$doc_root}/server/html/index.html">Server API Docs</a></li>
+		<li><a href="https://github.com/harlo/InformaCam-Service" target="_blank">Codebase</a></li>
+		<li><a href="https://dev.guardianproject.info/projects/informacam/wiki/">Wiki</a></li>
+	</ul>
+EOH;
+	
+	include "layouts/container.php";
 });
 
 // THIS IS HORRIBLE!!!
@@ -135,6 +159,14 @@ $app->get('/layouts/:file', function($file) {
 
 // THIS IS ALSO HORRIBLE!!!
 $app->get('/media/:path/:file/', function($path, $file) {
+	if(preg_match('/.ogv/i', $file)) {
+		header('Content-type: video/ogg');
+	}
+	
+	if(preg_match('/.mp4/i', $file)) {
+		header('Content-type: video/mp4');
+	}
+	
 	echo file_get_contents('/home/ubuntu/assets/submissions/' . $path . '/' . $file);
 });
 
