@@ -2,13 +2,19 @@
 	<table>
 		<tr>
 			<td>
-				<img class="render_fit" src="/media/{{ _id }}/{{ file_name }}/" />
+				<div class="render_media" asset="/media/{{ _id }}/high_{{ file_name }}">
+				</div>
 			</td>
 			<td>
 				<ul>
 					<li><b>ID:</b> {{ _id }}</li>
 					<li><b>Asset Path:</b> {{ asset_path }}</li>
-					<li><b>J3M Path:</b> {{ j3m }}</li>
+					<li><b>J3M:</b> <a class="control" onclick="expandJ3M();">{{ j3m }}</a>
+						<div id="j3m_dump" style="display:none;">
+							<textarea></textarea><br />
+							<a onclick="expandJ3M();" class="control">[hide]</a>
+						</div>
+					</li>
 					<li><b>Date Admitted:</b> {{ date_admitted }}</li>
 				</ul>
 			</td>
