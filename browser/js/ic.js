@@ -1,4 +1,4 @@
-var response_dump;
+var response_dump, j3m_dump;
 var registration;
 
 $(document).ready(function() {
@@ -33,6 +33,64 @@ function expandOutput() {
 	}
 }
 
+function setJ3MDump(data) {
+	j3m_dump = data;
+}
+
+function expandJ3M() {
+	var j3m_display = $("#j3m_dump");
+	if(j3m_display.css('display') == 'none') {
+		var j3m = $(j3m_display.find('textarea')[0]);
+		if(j3m.val().length == 0 && j3m_dump != undefined) {
+			$.ajax({
+				url: "/media/" + j3m_dump,
+				dataType: "html",
+				success: function(html) {
+					j3m.val(html);
+				}
+			});
+		}
+		
+		j3m_display.css('display','block');
+	} else {
+		j3m_display.css('display','none');
+	}
+}
+
+function renderMedia(root) {
+	
+	$.each(root.find(".render_thumb"), function() {
+		var thumb = $(this).prop('src');
+		if(thumb.indexOf(".mkv") >= 0) {
+			$(this).prop('src',thumb.replace('.mkv','.jpg'));
+		}
+	});
+	
+	$.each(root.find(".render_media"), function() {
+		var asset = $(this).attr('asset');
+		var media;
+		
+		if(asset.indexOf(".mkv") >= 0) {
+			media = $(document.createElement('video'))
+				.attr('controls','true')
+				.addClass('render_fit');
+			media.append(
+				$(document.createElement('source'))
+					.attr('src', asset.replace('.mkv','.ogv'))
+					.prop('type', 'video/ogg')
+			);
+		} else if(asset.indexOf(".jpg") >= 0) {
+			media = $(document.createElement('img'))
+				.prop('src', asset)
+				.addClass('render_fit');
+		}
+		
+		if(media != undefined) {
+			$(this).append(media);
+		}
+	});
+}
+
 function render(data, layout, root) {
 	data = $.parseJSON(data);
 	if(data.result == 200) {
@@ -49,7 +107,9 @@ function render(data, layout, root) {
 				$.each(data.data, function() {
 					var d = this;
 					$("#" + root).append(Mustache.to_html(html, d));
-				})
+				});
+				
+				renderMedia($("#" + root));
 			}
 		});
 	}
