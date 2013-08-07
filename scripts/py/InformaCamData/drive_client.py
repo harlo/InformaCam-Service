@@ -46,6 +46,11 @@ class DriveClient(InformaCamDataClient):
 		
 		return self.mime_type_map[mime_type]
 		
+	def validateMediaObject(self, fileId):
+		super(DriveClient, self).validateMediaObject(fileId)
+		
+		return True
+		
 	def getFile(self, fileId):
 		super(DriveClient, self).getFile(fileId)
 		
@@ -107,6 +112,9 @@ class DriveClient(InformaCamDataClient):
 				return True
 				
 		except errors.HttpError, e:
+			pass
+		except TypeError, e:
+			print e
 			pass
 			
 		return False
