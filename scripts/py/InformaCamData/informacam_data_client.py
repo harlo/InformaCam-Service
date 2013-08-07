@@ -1,5 +1,5 @@
-import json, copy, md5, time
-from conf import file_salt
+import json, copy, md5, time, os
+from conf import file_salt, scripts_home
 
 __metaclass__ = type
 
@@ -7,14 +7,16 @@ mime_types = {
 	'text': "text/plain",
 	'zip' : "application/zip",
 	'image' : "image/jpeg",
-	'video' : "video/mkv"
+	'video' : "video/x-matroska",
+	'wildcard' : "application/octet-stream"
 }
 
 mime_type_map = {
 	'text/plain': "txt",
 	'application/zip': "zip",
 	'image/jpeg': "jpg",
-	'video/mkv': "mkv"
+	'video/x-matroska': "mkv",
+	'application/octet-stream': 'wildcard'
 }
 
 class InformaCamDataClient():
@@ -94,6 +96,14 @@ class InformaCamDataClient():
 				usually an id for the file
 		"""
 		print "getting asset mime type %s" % file_id
+		
+	def validateMediaObject(self, file_id, returnType=False):
+		"""Checks a file to see if it indeed is image or mkv video.
+		
+		arguments
+			file_id (string or object)
+		"""
+		print "validating media object %s" % file_id
 		
 	def mapMimeTypeToExtension(self, mime_type):
 		print "mapping mime type to extension"
