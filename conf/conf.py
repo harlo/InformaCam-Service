@@ -14,6 +14,24 @@ sync = [
 ]
 sync_sleep = 10	# minutes
 
+wigle = {
+	'username' : 'username',
+	'password' : 'password',
+	'base_url' : "https://wigle.net/",
+	'login_url' : "gps/gps/main/login",
+	'logout_url' : "gps/gps/main/logout",
+	'cookie_jar' : "%swigle_cookiejar.txt" % conf,
+	'query_url' : "gps/gps/main/confirmlocquery/",
+	'query' : {
+		'bssid' : "netid",
+		'ssid' : "ssid",
+		'lat_south' : 'latrange1',
+		'lat_north' : 'latrange2',
+		'lon_east' : 'longrange1',
+		'lon_west' : 'longrange2'
+	}
+}
+
 drive = {
 	"client_secrets" : "%sclient_secrets.json" % conf,
 	"p12" : "%syour-gdata-privatekey.p12" % conf,
