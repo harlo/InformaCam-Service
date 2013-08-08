@@ -1,6 +1,32 @@
 import sys, subprocess, os, cStringIO, pycurl, re, json
-import gzip
+import gzip, threading
 from conf import api
+
+class ShellThreader(threading.Thread):
+	def __init__(self, cmd, op_dir=None):
+		threading.Thread.__init__(self)
+		self.cmd = cmd
+		
+		if op_dir is not None:
+			self.return_dir = os.getcwd()
+			os.chdir(op_dir)
+		
+	def run(self):
+		self.output = ShellReader(self.cmd)
+		if hasattr(self, 'return_dir'):
+			os.chdir(self.return_dir)
+			
+class ExternalApiThreader(threading.Thread):
+	def __init__(self, url, data=None, post=False, cookiejar=None, send_cookie=None):
+		threading.Thread.__init__(self)
+		self.url = url
+		self.data = data
+		self.post = post
+		self.cookiejar = cookiejar
+		self.send_cookie = send_cookie
+		
+	def run(self):
+		self.output = callExternalApi(self.url, data=self.data, post=self.post, cookiejar=self.cookiejar, send_cookie=self.send_cookie)
 
 def gzipAsset(path_to_file):
 	_out = cStringIO.StringIO()
@@ -13,6 +39,43 @@ def gzipAsset(path_to_file):
 	_in.close()
 	
 	return _out.getvalue()
+
+def callExternalApi(url, data=None, post=False, cookiejar=None, send_cookie=None):	
+	buf = cStringIO.StringIO()
+	d = []
+	dataString = None
+	
+	c = pycurl.Curl()
+	
+	c.setopt(c.VERBOSE, False)
+	c.setopt(c.WRITEFUNCTION, buf.write)
+	
+	if data is not None:	# data is a dict
+		for key, value in data.iteritems():
+			d.append("%s=%s" % (key, value))
+		dataString = "&".join(d)
+		
+		if not post:
+			url = "%s?%s" % (url, dataString)
+		else:
+			c.setopt(c.POSTFIELDS, dataString)
+			
+	if cookiejar is not None:
+		print "SHOULD SAVE COOKIE AT %s" % cookiejar
+		c.setopt(c.COOKIEJAR, cookiejar)
+		
+	if send_cookie is not None:
+		print "SENDING REQUEST WITH A COOKIE: %s" % send_cookie
+		c.setopt(c.COOKIE, send_cookie)
+		
+	print "CALLING API ON %s" % url	
+	c.setopt(c.URL, url)
+	c.perform()
+	
+	res = buf.getvalue()
+	buf.close()
+	
+	return str(res)
 
 def callApi(url, data=None, post=False):
 	url = "http://localhost:%d/%s/" % (api['port'], url)
@@ -135,10 +198,16 @@ def AsTrueValue(str_value):
 	try:
 		if int(str_value):
 			return int(str_value)
-		elif float(str_value):
-			return float(str_value)
 	except ValueError:
-		return str_value
+		pass
+		
+	try:
+		if float(str_value):
+			return float(str_value)	
+	except ValueError:
+		pass
+		
+	return str_value
 
 def GetTrueValue(str_value):
 	str_value = str(str_value)
@@ -151,11 +220,18 @@ def GetTrueValue(str_value):
 	try:
 		if int(str_value):
 			return 'int'
-		elif float(str_value):
+	except ValueError as e:
+		print "GET TRUE VALUE ERROR: %s so i returned i try float " % e
+		pass
+		
+	try:
+		if float(str_value):
 			return 'float'
 	except ValueError as e:
-		print "GET TRUE VALUE ERROR: %s so i returned str" % e
-		return 'str'
+		print "GET TRUE VALUE ERROR: %s so i returned i return str " % e
+		pass
+		
+	return 'str'
 		
 def ShellReader(cmd, omitNewLine = True):
 	print "CMD: %s" % cmd
