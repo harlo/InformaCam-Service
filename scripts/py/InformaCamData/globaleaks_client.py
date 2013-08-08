@@ -3,7 +3,7 @@ from informacam_data_client import InformaCamDataClient
 from conf import globaleaks, scripts_home
 
 sys.path.insert(0, "%sInformaCamUtils" % scripts_home['python'])
-from funcs import ShellReader
+from funcs import ShellReader, ShellThreader
 
 class GlobaleaksClient(InformaCamDataClient):
 	def __init__(self):
@@ -30,14 +30,15 @@ class GlobaleaksClient(InformaCamDataClient):
 		if extras is not None:
 			args = args + extras
 			
-		print args
-		
-		return ShellReader([
+		ssh_thread = ShellThreader([
 			"fab",
 			"-f",
 			os.path.join(os.getcwd(), "ssh_helper.py"),
 			"%s:%s" % (function, ",".join(args))
 		])
+		
+		ssh_thread.start()
+		return ssh_thread
 	
 	def getAssetMimeType(self, fileId):
 		super(GlobaleaksClient, self).getAssetMimeType(fileId)
@@ -50,7 +51,7 @@ class GlobaleaksClient(InformaCamDataClient):
 				globaleaks['user']
 			),
 			"local_dump=%s" % os.getcwd()
-		])
+		]).join()
 		
 		m = magic.Magic(flags=magic.MAGIC_MIME_TYPE)
 		mime_type = m.id_filename(os.path.join(os.getcwd(), fileId))
@@ -65,21 +66,20 @@ class GlobaleaksClient(InformaCamDataClient):
 	def validateMediaObject(self, fileId, returnType=False):
 		super(GlobaleaksClient, self).validateMediaObject(fileId,returnType)
 		
-		isValid = False
-		mime_type_found = None
-		
 		input = os.path.join(os.getcwd(), fileId)
 		output = "%s.log" % input[:-3]
 				
-		cmd = [
+		ffmpeg_thread = ShellThreader([
 			"fab",
 			"-f",
 			os.path.join(os.getcwd(),"ffmpeg_helper.py"),
 			"getInfo:input=%s,output=%s" % (input, output)
-		]
+		])
+		ffmpeg_thread.start()
+		ffmpeg_thread.join()
 		
-		ShellReader(cmd)
-		
+		isValid = False
+		mime_type_found = None
 		input_0 = None
 		input_0_sentinel = "Input #0, "
 		
@@ -139,7 +139,10 @@ class GlobaleaksClient(InformaCamDataClient):
 		assets = []
 		sentinel = "[%s] out: " % globaleaks['host']
 		
-		for line in self.sshToHost('listAssets'):
+		asset_thread = self.sshToHost('listAssets')
+		asset_thread.join()
+		
+		for line in asset_thread.output:
 			l_match = re.search(re.escape(sentinel), line)
 			if l_match is not None:
 				files = line[len(sentinel) :].split("  ")
