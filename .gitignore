@@ -1,3 +1,5 @@
 .DS_Store
 *.pyc
+conf/conf.py
+conf/conf.pyc
 conf/*
