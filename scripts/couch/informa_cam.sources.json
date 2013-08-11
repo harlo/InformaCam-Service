@@ -1,0 +1,28 @@
+{
+   "_id": "_design/sources",
+   "language": "javascript",
+   "views": {
+       "getSources": {
+           "map": "function(doc) {
+           	if(doc.rt_ !== 1) {
+           		return;
+           	}
+           	
+           	if(\"invalidate\" in doc) {
+           		return;
+           	}
+           	
+           	emit(doc._id, doc);
+           }"
+       },
+       "getSourceByFingerprint": {
+           "map": "function(doc) {
+           	if(doc.rt_ !== 1) {
+           		return;
+           	}
+           	
+           	emit(doc.fingerprint, doc);
+           }"
+       }
+   }
+}

@@ -1,0 +1,19 @@
+{
+   "_id": "_design/submissions",
+   "language": "javascript",
+   "views": {
+       "getSubmissions": {
+           "map": "function(doc) {
+           	if(doc.rt_ !== 2) {
+           		return;
+           	}
+           	
+           	if(\"invalid\" in doc) {
+           		return;
+           	}
+           	
+           	emit(doc._id, doc);
+           }"
+       }
+   }
+}

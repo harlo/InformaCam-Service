@@ -1,0 +1,33 @@
+{
+   "_id": "_design/contexts",
+   "language": "javascript",
+   "views": {
+       "getContextDocuments": {
+           "map": "function(doc) {
+           	if(doc.rt_ !== 3) {
+           		return;
+           	}
+           	
+           	emit(doc._id, doc);
+           }"
+       },
+       "getContextDocumentBySource": {
+           "map": "function(doc) {
+           	if(doc.rt_ !== 3) {
+           		return;
+           	}
+           	
+           	emit(doc.source_id, doc);
+           }"
+       },
+       "getContextDocumentBySubmission": {
+           "map": "function(doc) {
+           	if(doc.rt_ !== 3) {
+           		return;
+           	}
+           	
+           	emit(doc.submission_id, doc);
+           }"
+       }
+   }
+}
