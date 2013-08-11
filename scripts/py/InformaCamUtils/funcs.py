@@ -1,4 +1,4 @@
-import sys, subprocess, os, cStringIO, pycurl, re, json
+import sys, subprocess, os, cStringIO, pycurl, re, json, math
 import gzip, threading
 from conf import api
 
@@ -58,14 +58,15 @@ def callExternalApi(url, data=None, post=False, cookiejar=None, send_cookie=None
 		if not post:
 			url = "%s?%s" % (url, dataString)
 		else:
+			if type(dataString) is unicode:
+				dataString = str(unUnicode(dataString))
+				
 			c.setopt(c.POSTFIELDS, dataString)
 			
 	if cookiejar is not None:
-		print "SHOULD SAVE COOKIE AT %s" % cookiejar
 		c.setopt(c.COOKIEJAR, cookiejar)
 		
 	if send_cookie is not None:
-		print "SENDING REQUEST WITH A COOKIE: %s" % send_cookie
 		c.setopt(c.COOKIE, send_cookie)
 		
 	print "CALLING API ON %s" % url	
@@ -192,6 +193,8 @@ def AsTrueValue(str_value):
 			return True
 		if str_value == "false":
 			return False
+		if type(str_value) is unicode:
+			return unicode.join(u'\n', map(unicode, str_value))
 	except AttributeError:
 		pass
 	
@@ -232,6 +235,9 @@ def GetTrueValue(str_value):
 		pass
 		
 	return 'str'
+	
+def unUnicode(data):
+		return AsTrueValue(unicode.join(u'\n', map(unicode, data)))
 		
 def ShellReader(cmd, omitNewLine = True):
 	print "CMD: %s" % cmd
@@ -259,3 +265,22 @@ def ShellReader(cmd, omitNewLine = True):
 	stdin.close()
 
 	return data_read
+	
+def haversine(lat_lon_1, lat_lon_2):
+	R = 6372.8	#km
+	d_lat = math.radians(lat_lon_2['latitude'] - lat_lon_1['latitude'])
+	d_lon = math.radians(lat_lon_2['longitude'] - lat_lon_1['longitude'])
+	lat_1 = math.radians(lat_lon_1['latitude'])
+	lat_2 = math.radians(lat_lon_2['latitude'])
+	
+	a = math.sin(d_lat/2) * math.sin(d_lat/2) + math.sin(d_lon/2) * math.sin(d_lon/2) * math.cos(lat_1) * math.cos(lat_2)
+	c = 2 * math.asin(math.sqrt(a))
+	
+	print "haversine distance: %d km" % (R * c)
+	return R * c
+	
+def isWithinRange(range, target):
+	return range[0] <= target <= range[1]
+	
+def isNearby(lat_lon_1, lat_lon_2, radius):
+	return haversine(lat_lon_1, lat_lon_2) <= radius

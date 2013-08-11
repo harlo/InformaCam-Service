@@ -4,9 +4,12 @@ from funcs import GetTrueValue
 from conf import couch
 
 class Wrapper():
-	def __init__(self, view):
+	def __init__(self, view, db=None):
+		if db is None:
+			db = couch['db']
+			
 		self.buf = cStringIO.StringIO()
-		url = "%s@localhost:5984/%s/%s" % (couch['login'], couch['db'], view)
+		url = "%s@localhost:5984/%s/%s" % (couch['login'], db, view)
 		print url
 		curl = pycurl.Curl()
 		curl.setopt(pycurl.URL, url)
@@ -25,9 +28,14 @@ class Wrapper():
 		return json.loads(b_string)
 		
 class DB():
-	def __init__(self):
+	def __init__(self, db=None):
+		if db is None:
+			self.db_tag = couch['db']
+		else:
+			self.db_tag = db
+			
 		server = couchdb.Server("http://%s@localhost:5984" % couch['login'])
-		self.db = server[couch['db']]
+		self.db = server[self.db_tag]
 		
 	def removeKeysFromObject(self, obj, remove):
 		for rm in remove:
@@ -108,7 +116,7 @@ class DB():
 		if sort is not None:
 			view += self.applySort(sort)
 		
-		query = Wrapper(view)
+		query = Wrapper(view, db=self.db_tag)
 		result = []
 		docs = []
 		
@@ -171,7 +179,7 @@ class DB():
 			else:
 				view += "?key=%s" % vals[0]
 				
-		query = Wrapper(view)
+		query = Wrapper(view, self.db_tag)
 		result = []
 		
 		try:

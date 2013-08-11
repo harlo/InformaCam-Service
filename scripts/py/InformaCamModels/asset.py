@@ -1,24 +1,32 @@
-import time, couchdb, base64
+import time, couchdb, base64, copy
 
 from InformaCamUtils.couch import DB
 from InformaCamUtils.funcs import ShellReader, AsTrueValue
-from conf import invalidate
+from conf import invalidate, scripts_home
 
 __metaclass__ = type
 
 emit_omits = [
 	'db',
-	'_rev'
+	'_rev',
+	'emit_omits'
 ]
 
 rt_ = {
 	'source' : 1,
-	'submission' : 2
+	'submission' : 2,
+	'context' : 3,
+	'derivative' : 4
 }
 
 class Asset():
-	def __init__(self, inflate=None, _id=None):
-		self.db = DB()
+	def __init__(self, inflate=None, _id=None, extra_omits=None, db=None):
+		self.db = DB(db=db)
+		
+		self.emit_omits = copy.deepcopy(emit_omits)
+		if extra_omits is not None:
+			for omit in extra_omits:
+				self.emit_omits.append(omit)
 		
 		if _id is None:
 			if inflate is not None:
@@ -78,7 +86,7 @@ class Asset():
 	def emit(self):
 		emit = {}
 		for key, value in self.__dict__.iteritems():
-			if not key in emit_omits:
+			if not key in self.emit_omits:
 				if type(value) is unicode:
 					emit[key] = str(value)
 				else:
