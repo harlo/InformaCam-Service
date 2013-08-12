@@ -1,23 +1,7 @@
 import json, copy, md5, time, os
-from conf import file_salt, scripts_home
+from conf import file_salt, scripts_home, mime_types, mime_type_map
 
 __metaclass__ = type
-
-mime_types = {
-	'text': "text/plain",
-	'zip' : "application/zip",
-	'image' : "image/jpeg",
-	'video' : "video/x-matroska",
-	'wildcard' : "application/octet-stream"
-}
-
-mime_type_map = {
-	'text/plain': "txt",
-	'application/zip': "zip",
-	'image/jpeg': "jpg",
-	'video/x-matroska': "mkv",
-	'application/octet-stream': 'wildcard'
-}
 
 class InformaCamDataClient():
 	def __init__(self):

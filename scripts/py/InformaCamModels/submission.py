@@ -23,6 +23,10 @@ class Submission(Asset):
 		else:
 			super(Submission, self).makeDir("%ssubmissions/%s" % (assets_root, self._id))
 			
+	def setMimeType(self, mime_type):
+		setattr(self, 'mime_type', mime_type)
+		self.save()
+			
 	def importAssets(self, file_name):
 		self.file_name = file_name
 		self.j3m = "%sjson" % self.file_name[:-3]

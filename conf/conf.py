@@ -76,6 +76,21 @@ forms = [
 	'%sanother_form_you_made.xml' % forms_root
 ]
 
+form_fields = {
+	'translate' : [
+		{
+			'key' : 'a form key that should be translated from int to string',
+			'values' : ['string','choices']
+		}
+	],
+	'binary' : [
+		'a form key that represents a binary upload'
+	],
+	'fti' : [
+		'a form key that should be full-text-indexable'
+	]
+}
+
 couch = {
 	"login" : "cdb_username:cdb_password",
 	"db" : "informa_cam"
@@ -127,4 +142,20 @@ context_codes = {
 		'source' : 700,
 		'wigle' : 701
 	}
+}
+
+mime_types = {
+	'text': "text/plain",
+	'zip' : "application/zip",
+	'image' : "image/jpeg",
+	'video' : "video/x-matroska",
+	'wildcard' : "application/octet-stream"
+}
+
+mime_type_map = {
+	'text/plain': "txt",
+	'application/zip': "zip",
+	'image/jpeg': "jpg",
+	'video/x-matroska': "mkv",
+	'application/octet-stream': 'wildcard'
 }

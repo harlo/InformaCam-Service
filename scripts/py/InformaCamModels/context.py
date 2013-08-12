@@ -48,7 +48,7 @@ class Context(Asset):
 		super(Context, self).__init__(
 			inflate, 
 			_id, 
-			extra_omits=['submission','source','j3m']
+			extra_omits=['submission','source','derivative','j3m']
 		)
 		
 		if not hasattr(self, 'submission_id'):
@@ -72,6 +72,7 @@ class Context(Asset):
 			return
 
 		from source import Source
+		from derivative import Derivative
 		if _id is None:
 			source = self.db.query(
 				'_design/sources/_view/getSourceByFingerprint', 
@@ -96,12 +97,81 @@ class Context(Asset):
 					invalidate['reasons']['source_missing_pgp_key']
 				)
 				
-			setattr(self, 'source_id', self.source._id)	
+			setattr(self, 'source_id', self.source._id)
+			
+			self.derivative = Derivative(inflate=self.parseDerivativeEntries())
+			setattr(self, 'derivative_id', self.derivative._id)
+			
 			self.parseLocationEntries()
 			self.save()
 		else:
 			self.source = Source(_id=self.source_id)
+			self.derivative = Derivative(_id=self.derivative_id)
 			
+	def parseDerivativeEntries(self):
+		keywords = []
+		annotations = []
+		
+		try:
+			kw = open(os.path.join(self.submission.asset_path, "key_words_%s" % self.submission.j3m))
+			keywords = json.loads(kw.read())['keywords']
+			kw.close()
+			
+		except: pass
+				
+		from derivative import translateFormValue
+		for entry in self.j3m['data']['userAppendedData']:
+			try:
+				for f, form_data in enumerate(entry['associatedForms']):	
+					annotation = None	
+					print entry
+								
+					try:
+						annotation = {
+							'content' : translateFormValue(form_data['answerData']),
+							'addedBy' : self.source._id,
+							'dateAdded' : entry['timestamp']
+						}
+					except:
+						continue
+						
+					if annotation is None:
+						continue
+						
+					try:
+						annotation['index'] = entry['index']
+					except KeyError as e:
+						print "no index for annotation: %s" % e
+						pass
+						
+					try:
+						annotation['regionBounds'] = entry['regionBounds']
+						
+						del annotation['regionBounds']['displayWidth']
+						del annotation['regionBounds']['displayHeight']
+						del annotation['regionBounds']['displayTop']
+						del annotation['regionBounds']['displayLeft']
+						
+						if annotation['regionBounds']['startTime'] == -1:
+							del annotation['regionBounds']['startTime']
+							
+						if annotation['regionBounds']['endTime'] == -1:
+							del annotation['regionBounds']['endTime']
+							
+					except KeyError as e:
+						print "no region bounds for annotation: %s" % e
+						pass
+						
+					
+					annotations.append(annotation)
+			except:
+				continue
+			
+		return {
+			'keywords' : keywords,
+			'annotations' : annotations
+		}		
+	
 	def parseLocationEntries(self):
 		capture_min = self.j3m['genealogy']['dateCreated']
 		capture_max = capture_min + self.j3m['data']['exif']['duration']

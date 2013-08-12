@@ -38,6 +38,8 @@ def watch():
 				api_call = "sources"				
 			else:
 				api_call = "submissions"
+				data['mime_type'] = mime_type
+				
 				if data['package_name'][-3 :] != client.mime_type_map[mime_type]:
 					data['package_name'] = "%s.%s" % (
 						data['package_name'], 
@@ -52,7 +54,7 @@ def watch():
 					client.lockFile(asset)
 
 class Watcher():
-	"""The daemon class that pulls new media from subscribed repositories every 10 minutes."""
+	"""The daemon class that pulls new media from subscribed repositories every 2 minutes."""
 	def __init__(self):
 		self.stdin_path = '/dev/null'
 		self.stdout_path = '/dev/tty'
