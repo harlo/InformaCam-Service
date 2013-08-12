@@ -88,6 +88,33 @@ class DB():
 					
 		return parent
 		
+	def geoquery(self, view, bbox):
+		view += "points?bbox=%s" % bbox
+		print view
+		
+		query = Wrapper(view, db=self.db_tag)
+		result = []
+		
+		try:
+			for row in query.perform()['rows']:
+				try:
+					result.append(row['value'])
+				except KeyError as e:
+					print e
+					continue
+					
+			if len(result) == 0:
+				result.append(False)
+					
+		except KeyError as e:
+			print e
+			pass
+			
+		if len(result) == 0:
+				result.append(False)
+		
+		return result
+		
 	def query(self, view, params = None, remove = None, include_only = None, sort=None):
 		# BTW params go in reverse alpha
 		if remove is not None:

@@ -1,0 +1,1 @@
+{"_id": "_design/geosearch","spatial": {"points": "function(doc) {if(doc.location) {for(var l=0; l<doc.location.length; l++) {emit({type: \"Point\",coordinates: [doc.location[l].latitude,doc.location[l].longitude]}, doc);}}}"}}

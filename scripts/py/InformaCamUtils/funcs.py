@@ -1,4 +1,4 @@
-import sys, subprocess, os, cStringIO, pycurl, re, json, math
+import sys, subprocess, os, cStringIO, pycurl, re, json, math, operator
 import gzip, threading
 from conf import api
 
@@ -266,6 +266,22 @@ def ShellReader(cmd, omitNewLine = True):
 
 	return data_read
 	
+def makeBoundingBox(lat, lon, radius):
+	print "making a bounding box for [%f,%f] (radius = %d km)" % (lat, lon, radius)
+	
+	e = 6372.8
+	d_lat = radius/e
+	d_lon = math.asin(math.sin(d_lat)/math.cos(math.radians(lat)))
+	
+	d_lat, d_lon = math.degrees(d_lat), math.degrees(d_lon)
+	
+	original_box = [lat, lon, lat, lon]
+	offsets = []
+	offsets.extend(map(math.radians, (lon - d_lon, lon + d_lon)))
+	offsets.extend(map(math.radians, (lat - d_lat, lat + d_lat)))
+	
+	return map(operator.add, original_box, offsets)
+
 def haversine(lat_lon_1, lat_lon_2):
 	R = 6372.8	#km
 	d_lat = math.radians(lat_lon_2['latitude'] - lat_lon_1['latitude'])
