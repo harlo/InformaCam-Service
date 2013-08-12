@@ -1,6 +1,6 @@
 import urllib, cStringIO, pycurl, subprocess, couchdb, hashlib, funcs
 import simplejson as json
-from funcs import GetTrueValue
+from funcs import GetTrueValue, makeBoundingBox
 from conf import couch
 
 class Wrapper():
@@ -88,9 +88,9 @@ class DB():
 					
 		return parent
 		
-	def geoquery(self, view, bbox):
-		view += "points?bbox=%s" % bbox
-		print view
+	def geoquery(self, lat, lon, radius):
+		bbox = str(makeBoundingBox(lat, lon, radius))[1:-1].replace(" ","")
+		view = "_design/geosearch/_spatial/points?bbox=%s" % bbox
 		
 		query = Wrapper(view, db=self.db_tag)
 		result = []
