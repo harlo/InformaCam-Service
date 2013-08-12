@@ -31,6 +31,9 @@ installed python-gnupg
 installed python-fabric
 	easy_install fabric
 
+installed beautifusoup4
+	easy_install beautifusoup4
+
 installed python-daemon
 	wget https://pypi.python.org/packages/source/p/python-daemon/python-daemon-1.6.tar.gz#md5=c774eda27d6c5d80b42037826d29e523
 	tar -xvzf python-daemon
@@ -77,8 +80,34 @@ add couchdb user
 	sudo usermod -G couchdb -a 'couchdb'
 	sudo chown -R couchdb:couchdb ~/couchdb/
 	
-set-up couchdb with users, databases
+set-up couchdb with users, databases (informa_cam, consolidated)
+
+install geocouch
+	cd ~/packages
+	git clone -b couchdb1.3.x https://github.com/couchbase/geocouch.git
+	cd geocouch
+	export COUCH_SRC=/home/ubuntu/packages/apache-couchdb-1.3.1/src/couchdb
+	make
+	sudo cp ~/packages/geocouch/ebin/* /usr/local/lib/couchdb/erlang/lib/couch-1.3.1/ebin
+	sudo cp ~/packages/geocouch/etc/couchdb/default.d/geocouch.ini /usr/local/etc/couchdb/default.d
+	sudo cp ~/packages/geocouch/share/www/script/test/* /usr/local/share/couchdb/www/script/test
 	
+	sudo vi /usr/local/share/couchdb/www/script/couch_tests.js
+		***add
+		loadTest("spatial.js");
+		loadTest("list_spatial.js");
+		loadTest("etags_spatial.js");
+		loadTest("multiple_spatial_rows.js");
+		loadTest("spatial_compaction.js");
+		loadTest("spatial_design_docs.js");
+		loadTest("spatial_bugfixes.js");
+		loadTest("spatial_merging.js");
+		loadTest("spatial_offsets.js");
+	
+	sudo vi /etc/environment
+		***add
+		ERL_FLAGS="-pa /home/ubuntu/packages/geocouch/ebin"
+
 install python-couchdb
 	wget http://pypi.python.org/packages/2.6/C/CouchDB/CouchDB-0.8-py2.6.egg
 	sudo easy_install CouchDB-0.8-py2.6.egg
