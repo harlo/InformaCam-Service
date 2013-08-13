@@ -77,7 +77,7 @@ class Context(Asset):
 			source = self.db.query(
 				'_design/sources/_view/getSourceByFingerprint', 
 				params={
-					'fingerprint' : self.j3m['intent']['pgpKeyFingerprint']
+					'fingerprint' : self.j3m['intent']['pgpKeyFingerprint'].lower()
 				}
 			)[0]
 			
@@ -109,22 +109,31 @@ class Context(Asset):
 			self.derivative = Derivative(_id=self.derivative_id)
 			
 	def parseDerivativeEntries(self):
-		keywords = []
-		annotations = []
+		inflate = {
+			'keywords' : [],
+			'annotations' : []
+		}
 		
 		try:
 			kw = open(os.path.join(self.submission.asset_path, "key_words_%s" % self.submission.j3m))
-			keywords = json.loads(kw.read())['keywords']
+			inflate['keywords'] = json.loads(kw.read())['keywords']
 			kw.close()
 			
 		except: pass
 				
 		from derivative import translateFormValue
+		try:
+			if 'userAppendedData' in self.j3m['data']:
+				pass
+			else:
+				return inflate
+		except KeyError as e:
+			return inflate
+			
 		for entry in self.j3m['data']['userAppendedData']:
 			try:
 				for f, form_data in enumerate(entry['associatedForms']):	
 					annotation = None	
-					print entry
 								
 					try:
 						annotation = {
@@ -163,14 +172,11 @@ class Context(Asset):
 						pass
 						
 					
-					annotations.append(annotation)
+					inflate['annotations'].append(annotation)
 			except:
 				continue
 			
-		return {
-			'keywords' : keywords,
-			'annotations' : annotations
-		}		
+		return inflate		
 	
 	def parseLocationEntries(self):
 		capture_min = self.j3m['genealogy']['dateCreated']

@@ -74,6 +74,16 @@ installed libs
 
 	sudo apt-get install libmozjs-dev libicu-dev libcurl4-gnutls-dev libtool
 	
+installed maven3
+
+	sudo apt-get install maven openjdk-7-jdk
+	sudo vi /etc/environment
+	***add
+	JAVA_HOME="/usr/lib/jvm/java-7-openjdk-amd64"
+	***modify whatever path was
+	PATH="$PATH:$JAVA_HOME/bin"
+
+	
 build couchdb deps
 
 	sudo apt-get build-dep couchdb
@@ -130,6 +140,21 @@ install geocouch
 	sudo vi /etc/environment
 		***add
 		ERL_FLAGS="-pa /home/ubuntu/packages/geocouch/ebin"
+		
+install couchdb-lucene
+	
+	cd ~/packages
+	git clone git://github.com/rnewson/couchdb-lucene.git
+	cd couchdb-lucene
+	mvn
+	
+	cd target
+	unzip couchdb-lucene-0.10.0-SNAPSHOT-dist.zip
+	
+	sudo vi /usr/local/etc/couchdb/local.ini
+	***modify
+	[httpd_global_handlers]
+	_fti = {couch_httpd_proxy, handle_proxy_req, <<"http://127.0.0.1:5985">>}
 
 install python-couchdb
 
@@ -181,6 +206,8 @@ make aliases
 	alias goto_cdb='screen -r WHATEVER THAT SCREEN IS'
 	alias goto_api='screen -r WHATEVER THAT SCREEN IS'
 	alias goto_watcher='screen -r WHATEVER THAT SCREEN IS'
+	alias lucene='cd /packages/couchdb-lucene/target/couchdb-lucene-0.10.0-SNAPSHOT-dist; ./bin/run'
+	alias goto_lucene='screen -r WHATEVER THAT SCREEN IS'
 	
 upload drive p12 to ~/conf
 

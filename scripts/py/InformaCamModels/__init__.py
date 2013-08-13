@@ -6,3 +6,4 @@ from bssid import *
 from cell_id import *
 from bt_device import *
 from derivative import *
+from fti_template import *

@@ -59,9 +59,10 @@ class Source(Asset):
 		import_result = gpg.import_keys(key.read())
 		key.close()
 				
-		self.fingerprint = import_result.results[0]['fingerprint']
+		fingerprint = import_result.results[0]['fingerprint']
 
-		if self.fingerprint is not None:
+		if fingerprint is not None:
+			self.fingerprint = fingerprint.lower()
 			self.save()
 			return True
 		else:
