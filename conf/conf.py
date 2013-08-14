@@ -114,17 +114,19 @@ invalidate = {
 		'submission_invalid_image' : 900,
 		'submission_invalid_video' : 901,
 		'submission_invalid_j3m' : 904,
+		'submission_undefined' : 906,
 		'access_denied' : 800
 	},
 	'reasons' : {
 		'asset_non_existent': "The requested asset does not exist",
-		'source_invalid_pgp_key' : "The pgp key at %s is invalid or corrupted",
+		'source_invalid_pgp_key' : "The pgp key is invalid or corrupted",
 		'source_missing_pgp_key' : "This source has no PGP key in the keyring",
 		'source_invalid_public_credentials' : "One or more of the public credentials files are invalid or corrupted",
-		'submission_invalid_image' : "The image at %s is invalid or corrupted",
-		'submission_invalid_video' : "The video at %s is invalid or corrupted",
+		'submission_invalid_image' : "The image is invalid or corrupted",
+		'submission_invalid_video' : "The video is invalid or corrupted",
 		'submission_invalid_j3m' : "The j3m for this submission is invalid or missing",
-		'access_denied' : "The user %s is attempting to access an asset beyond its permissions."
+		'submission_undefined' : "The derivative has no defined submission",
+		'access_denied' : "The user is attempting to access an asset beyond its permissions."
 	}
 }
 

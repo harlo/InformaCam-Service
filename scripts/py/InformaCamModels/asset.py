@@ -83,7 +83,7 @@ class Asset():
 		}
 		self.save()
 		
-	def emit(self):
+	def emit(self, include_only=None):
 		emit = {}
 		for key, value in self.__dict__.iteritems():
 			if not key in self.emit_omits:
@@ -91,8 +91,15 @@ class Asset():
 					emit[key] = str(value)
 				else:
 					emit[key] = value
-			
-		return emit
+		
+		if include_only is None:
+			return emit
+		else:
+			emit_ = {}
+			for include in include_only:
+				emit_[include] = emit[include]
+				
+			return emit_
 		
 	def inflate(self, inflate):
 		for key, value in inflate.iteritems():

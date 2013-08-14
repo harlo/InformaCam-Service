@@ -2,7 +2,15 @@ import sys, subprocess, os, cStringIO, pycurl, re, json, math, operator
 import gzip, threading
 from conf import api
 
+R = 6372.8	#km
+
 class ShellThreader(threading.Thread):
+	"""Do a shell call in a new thread.  ShellThreader.output contains its result.
+
+	arguments:
+	* cmd (list)
+	* op_dir (str) _optional_
+	"""
 	def __init__(self, cmd, op_dir=None):
 		threading.Thread.__init__(self)
 		self.cmd = cmd
@@ -267,10 +275,17 @@ def ShellReader(cmd, omitNewLine = True):
 	return data_read
 	
 def makeBoundingBox(lat, lon, radius):
+	"""Returns a bounding box of specified radius around given lat/lon point.
+	
+	arguments:
+	* lat (float)
+	* long (float)
+	* radius (int)
+	"""
+	
 	print "making a bounding box for [%f,%f] (radius = %d km)" % (lat, lon, radius)
 	
-	e = 6372.8
-	d_lat = radius/e
+	d_lat = radius/R
 	d_lon = math.asin(math.sin(d_lat)/math.cos(math.radians(lat)))
 	
 	d_lat, d_lon = math.degrees(d_lat), math.degrees(d_lon)
@@ -283,7 +298,13 @@ def makeBoundingBox(lat, lon, radius):
 	return map(operator.add, original_box, offsets)
 
 def haversine(lat_lon_1, lat_lon_2):
-	R = 6372.8	#km
+	"""Returns the haversine distance between to lat/lon points.
+	
+	arguments:
+	* lat_lon_1 (dict {latitude=float, longitude=float})
+	* lat_lon_2 (dict {latitude=float, longitude=float})
+	"""
+	
 	d_lat = math.radians(lat_lon_2['latitude'] - lat_lon_1['latitude'])
 	d_lon = math.radians(lat_lon_2['longitude'] - lat_lon_1['longitude'])
 	lat_1 = math.radians(lat_lon_1['latitude'])

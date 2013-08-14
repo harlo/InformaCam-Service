@@ -31,7 +31,8 @@ class FTITemplate(Asset):
 		self.emit_omits = copy.deepcopy(emit_omits)
 		
 		self._rev = self.db.post(self.emit())['_rev']
-			
+		print self.emit()
+		
 		self.fulltext = {}
 		self.addSearchField('search_all', index=search_all)
 		

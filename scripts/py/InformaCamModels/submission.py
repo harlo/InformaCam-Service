@@ -1,5 +1,5 @@
 from asset import Asset, rt_
-from context import ContextThreader
+from derivative import DerivativeThreader
 from conf import assets_root, j3m, scripts_home
 import os, sys
 
@@ -42,7 +42,7 @@ class Submission(Asset):
 		], op_dir=j3m['root'])
 		j3m_thread.start()
 		
-		context_thread = ContextThreader(self)
-		context_thread.start()
+		derivative_thread = DerivativeThreader(self)
+		derivative_thread.start()
 				
 		return True		

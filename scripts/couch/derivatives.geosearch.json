@@ -1,0 +1,1 @@
+{"_id": "_design/geosearch","spatial": { "points": "function(doc) {if(!(\"known_locations\" in doc)) {return;} {for(var l=0; l<doc.known_locations.length; l++) {emit({type: \"Point\",coordinates: [doc.known_locations[l].latitude,doc.known_locations[l].longitude]}, doc);}}}"}}
