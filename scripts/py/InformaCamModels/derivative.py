@@ -76,29 +76,42 @@ class Derivative(Asset):
 		
 		from source import Source	
 		if _id is None:
-			source = self.submission.db.query(
-				'_design/sources/_view/getSourceByFingerprint', 
-				params={
-					'fingerprint' : self.j3m['intent']['pgpKeyFingerprint'].lower()
-				}
-			)[0]
+			fingerprint = None
+			try:
+				fingerprint = self.j3m['intent']['pgpKeyFingerprint'].lower()
+			except KeyError as e:
+				print "NO FINGERPRINT???"
+				self.source = Source(inflate={
+					'invalid': {
+						'error_code' : invalidate['codes']['source_missing_pgp_key'],
+						'reason' : invalidate['reasons']['source_missing_pgp_key']
+					}
+				})
+				
+			if fingerprint is not None:
+				source = self.submission.db.query(
+					'_design/sources/_view/getSourceByFingerprint', 
+					params={
+						'fingerprint' : fingerprint
+					}
+				)[0]
 			
-			if source:
-				self.source = Source(_id=source['_id'])
-			else:
-				# we didn't have the pgp key.  
-				# so init a new source and set an invalid flag about that.
+				if source:
+					self.source = Source(_id=source['_id'])
+				else:
+					# we didn't have the pgp key.  
+					# so init a new source and set an invalid flag about that.
 				
-				inflate = {
-					'fingerprint' : self.j3m['intent']['pgpKeyFingerprint'],
-				}
+					inflate = {
+						'fingerprint' : fingerprint
+					}
 				
-				## TODO: ACTUALLY THIS IS CASE-SENSITIVE!  MUST BE UPPERCASE!
-				self.source = Source(inflate=inflate)
-				self.source.invalidate(
-					invalidate['codes']['source_missing_pgp_key'],
-					invalidate['reasons']['source_missing_pgp_key']
-				)
+					## TODO: ACTUALLY THIS IS CASE-SENSITIVE!  MUST BE UPPERCASE!
+					self.source = Source(inflate=inflate)
+					self.source.invalidate(
+						invalidate['codes']['source_missing_pgp_key'],
+						invalidate['reasons']['source_missing_pgp_key']
+					)
 			
 			
 			setattr(self, 'source_id', self.source._id)
