@@ -1,9 +1,7 @@
 from conf import form_fields
 from InformaCamModels.fti_template import FTITemplate, inner, wrapper
 
-if __name__ == "__main__":
-	print "ATTEMPTING BOOTSTRAP"
-	
+def initForms():
 	inners = []
 	for idx in form_fields['fti']:
 		inners.append(inner % {'key' : idx})
@@ -15,3 +13,9 @@ if __name__ == "__main__":
 		fti_template.addSearchField(idx)
 	
 	print fti_template.emit()
+	# push to couchdb
+
+if __name__ == "__main__":
+	print "ATTEMPTING BOOTSTRAP"
+	
+	initForms()

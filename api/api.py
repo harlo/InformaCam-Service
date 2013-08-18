@@ -3,8 +3,8 @@ import sys, copy
 import tornado.ioloop
 import tornado.web
 import tornado.httpserver
-import updateRecord, textSearch
 
+from search import Search
 from conf import scripts_home, public, invalidate
 from base64 import b64encode
 
@@ -85,14 +85,21 @@ class Source(tornado.web.RequestHandler):
 		
 class Submissions(tornado.web.RequestHandler):
 	def get(self):
-		"""Lists all Submissions in the database."""
+		"""Lists all Submissions in the database.
+		
+		If query parameters are set, api will return matches.
+		
+		"""
 		
 		res = ServerResponse()
 		
-		res.data = db.query(
-			"_design/submissions/_view/getSubmissions",
-			remove=['_rev','rt_']
-		)
+		if(len(self.request.query) > 3):
+			res.data = Search(parseRequest(self.request.query)).perform()
+		else:
+			res.data = db.query(
+				"_design/submissions/_view/getSubmissions",
+				remove=['_rev','rt_']
+			)
 		if len(res.data) > 0 and res.data[0]:
 			res.result = 200
 		else:
@@ -169,9 +176,7 @@ routes = [
 	(r"/source/(.*)/", Source, dict(source_id=None)),
 	(r"/submissions/", Submissions),
 	(r"/submission/(.*)/", Submission, dict(submission_id=None)),
-	(r"/public/", PublicCredentials),
-        (r"/getSolrIndex", textSearch.solrIndex),
-        (r"/createDerivative/(\w+)", updateRecord.createDerivative),
+	(r"/public/", PublicCredentials)
 ]
 
 api = tornado.web.Application(routes)

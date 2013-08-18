@@ -76,6 +76,9 @@ class Derivative(Asset):
 		
 		from source import Source	
 		if _id is None:
+			setattr(self, 'date_created', self.j3m['genealogy']['dateCreated'])
+			self.save()
+			
 			fingerprint = None
 			try:
 				fingerprint = self.j3m['intent']['pgpKeyFingerprint'].lower()

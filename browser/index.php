@@ -24,9 +24,10 @@ EOH;
 	include "layouts/container.php";
 });
 
-$app->get('/sources/', function() {
+$app->get('/sources/', function() use ($app) {
 	$i_get = new IGet();
 	$i_get->setUrl("http://localhost:6666/sources/");
+	$i_get->setParam($app->request()->get());
 
 	$dump = $i_get->perform();
 	
@@ -49,9 +50,11 @@ EOH;
 	include "layouts/container.php";
 });
 
-$app->get('/submissions/', function() {
+$app->get('/submissions/', function() use ($app) {
 	$i_get = new IGet();
 	$i_get->setUrl("http://localhost:6666/submissions/");
+	$i_get->setParam($app->request()->get());
+	
 	$dump = $i_get->perform();
 	
 	$layout = new SimpleLayout($dump);
@@ -73,9 +76,11 @@ EOH;
 	include "layouts/container.php";
 });
 
-$app->get('/source/:source_id/', function($source_id) {
+$app->get('/source/:source_id/', function($source_id) use ($app) {
 	$i_get = new IGet();
 	$i_get->setUrl("http://localhost:6666/source/" . $source_id . "/");
+	$i_get->setParam($app->request()->get());
+	
 	$dump = $i_get->perform();
 	
 	$layout = new SimpleLayout($dump);
@@ -90,11 +95,12 @@ EOH;
 	include "layouts/container.php";
 });
 
-$app->get('/submission/:submission_id/', function($submission_id) {
+$app->get('/submission/:submission_id/', function($submission_id) use ($app) {
 	$i_get = new IGet();
 	$i_get->setUrl("http://localhost:6666/submission/" . $submission_id . "/");
-	$dump = $i_get->perform();
+	$i_get->setParam($app->request()->get());
 	
+	$dump = $i_get->perform();
 	$d = json_decode($dump);
 	
 	$layout = new SimpleLayout($dump);
@@ -132,8 +138,8 @@ $app->get('/documentation/', function() {
 		$("#response_dump").css('display','none');
 	</script>
 	<ul>
-		<li><a href="{$doc_root}/api/html/index.html">Data API Docs</a></li>
-		<li><a href="{$doc_root}/server/html/index.html">Server API Docs</a></li>
+		<li><a href="{$doc_root}/api/html/annotated.html">Data API Docs</a></li>
+		<li><a href="{$doc_root}/server/html/annotated.html">Server API Docs</a></li>
 		<li><a href="https://github.com/harlo/InformaCam-Service" target="_blank">Codebase</a></li>
 		<li><a href="https://dev.guardianproject.info/projects/informacam/wiki/">Wiki</a></li>
 	</ul>

@@ -42,7 +42,7 @@ class DB():
 			try:
 				del obj[rm]
 			except:
-				pass
+				continue
 			
 		return obj
 		
@@ -67,6 +67,7 @@ class DB():
 				count += 1
 				
 		elif type(parent) is dict:
+			
 			for key, value in parent.iteritems():
 				#print "%s: %s (%s)" % (key, value, type(value))
 				for child in children:
@@ -80,16 +81,21 @@ class DB():
 				parent[key] = self.consolidate(value, children, remove)				
 		else:
 			for child in children:
+				print child
+				
 				if parent == child['_id']:
 					if remove is not None:
 						child = self.removeKeysFromObject(child, remove)
 					
 					return child
-					
+		
+		if remove is not None:
+			parent = self.removeKeysFromObject(parent, remove)
+						
 		return parent
 		
-	def geoquery(self, lat, lon, radius):
-		bbox = str(makeBoundingBox(lat, lon, radius))[1:-1].replace(" ","")
+	def geoquery(self, geo):
+		bbox = str(makeBoundingBox(geo['latitude'], geo['longitude'], geo['radius']))[1:-1].replace(" ","")
 		view = "_design/geosearch/_spatial/points?bbox=%s" % bbox
 		
 		query = Wrapper(view, db=self.db_tag)
@@ -98,7 +104,7 @@ class DB():
 		try:
 			for row in query.perform()['rows']:
 				try:
-					result.append(row['value'])
+					result.append(row['id'])
 				except KeyError as e:
 					print e
 					continue
@@ -115,7 +121,53 @@ class DB():
 		
 		return result
 		
-	def query(self, view, params = None, remove = None, include_only = None, sort=None):
+	def lucene_query(self, view, q=None, params=None):
+		view = "%s?q=" % view
+		
+		if q is not None:
+			view += q
+		
+		if params is not None:
+			if q is not None:
+				view += " AND "
+				
+			vals = []
+			for k, v in params.iteritems():
+				vals.append("%s:%s" % (k,v))
+				
+			if len(vals) > 1:
+				view += " AND ".join(vals)
+			else:
+				view += vals[0]
+		
+		print view
+		query = Wrapper(view, db="_fti/local/%s" % self.db_tag)
+		result = query.perform()
+		
+		results = []
+		if type(result) == list:
+			for rows in result:
+				try:
+					for row in rows['rows']:
+						results.append(row['id'])
+				except TypeError as e:
+					print e
+					continue
+		else:
+			try:
+				for row in result['rows']:
+					results.append(row['id'])
+			except TypeError as e:
+				print e
+				pass
+
+			
+		if len(results) == 0:
+			results.append(False)
+
+		return list(set(results))
+		
+	def query(self, view, params = None, remove = None, include_only = None, include_only_as_list=False, sort=None):
 		# BTW params go in reverse alpha
 		if remove is not None:
 			remove.append('child_of')
@@ -130,13 +182,19 @@ class DB():
 					vals.append(urllib.quote("\"%s\"" % v))
 				elif type(v) is int:
 					vals.append(str(v))
-				elif type(v) is boolean:
+				elif type(v) is bool:
 					vals.append(str(v))
+				elif type(v) is list:
+					for v_ in v:
+						if type(v_) is str or type(v_) is unicode:
+							vals.append(urllib.quote("\"%s\"" % v_))
+						else:
+							vals.append(v_)
 				else:
 					vals.append(v)
 			
 			if len(vals) > 1:
-				view += "&key=%s%s%s" % (urllib.quote("["), ",".join(vals), urllib.quote("]"))
+				view += "&keys=%s%s%s" % (urllib.quote("["), ",".join(vals), urllib.quote("]"))
 			else:
 				view += "&key=%s" % vals[0]
 		
@@ -150,9 +208,7 @@ class DB():
 		try:
 			for row in query.perform()['rows']:
 				row['value'] = self.removeKeysFromObject(row['value'], remove)
-				if include_only is not None:	# TODO!
-					print row['value'].keys()
-			
+					
 				try:
 					if type(row['value']) is not bool and len(row['value'].keys()) == 1 and row['value'].keys()[0] == "_id":
 						row['doc']['child_of'] = row['key']
@@ -169,8 +225,18 @@ class DB():
 			if len(result) == 0:
 				result.append(False)
 			else:
+				if include_only is not None:
+					remove = list(set(result[0].keys()) - set(include_only))
+					
 				for res in result:
 					res = self.consolidate(res, docs, remove)
+					
+				if include_only_as_list and len(include_only) == 1:
+					result_ = []
+					for res in result:
+						result_.append(res[include_only[0]])
+					result = result_
+					
 		except KeyError as e:
 			result.append(False)
 			
