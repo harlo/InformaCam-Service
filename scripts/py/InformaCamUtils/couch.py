@@ -142,7 +142,6 @@ class DB():
 				view += vals[0]
 		'''
 		
-		print view
 		query = Wrapper(view, db="_fti/local/%s" % self.db_tag)
 		result = query.perform()
 		
@@ -257,7 +256,6 @@ class DB():
 				if include_only_as_list and len(include_only) == 1:
 					result_ = []
 					for res in result:
-						print res
 						result_.append(res[include_only[0]])
 					result = result_
 					

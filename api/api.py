@@ -4,7 +4,6 @@ import tornado.ioloop
 import tornado.web
 import tornado.httpserver
 
-from search import Search
 from conf import scripts_home, public, invalidate
 from base64 import b64encode
 
@@ -88,13 +87,13 @@ class Submissions(tornado.web.RequestHandler):
 		"""Lists all Submissions in the database.
 		
 		If query parameters are set, api will return matches.
-		
 		"""
 		
 		res = ServerResponse()
 		
 		if(len(self.request.query) > 3):
-			res.data = Search(parseRequest(self.request.query)).perform()
+			search = DerivativeSearch(parseRequest(self.request.query))			
+			res.data = search.submissions
 		else:
 			res.data = db.query(
 				"_design/submissions/_view/getSubmissions",
@@ -185,6 +184,7 @@ if __name__ == "__main__":
 	sys.path.insert(0, scripts_home['python'])
 	from InformaCamModels.source import Source as ICSource
 	from InformaCamModels.submission import Submission as ICSubmission
+	from InformaCamModels.derivative import DerivativeSearch
 	from InformaCamUtils.funcs import parseRequest, parseArguments, passesParameterFilter, gzipAsset
 	from InformaCamUtils.couch import DB
 	

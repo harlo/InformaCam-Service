@@ -1,4 +1,4 @@
-import threading, time, os, json, sys
+import threading, time, os, json, sys, re
 
 from asset import Asset, rt_, emit_omits
 from bssid import BSSID
@@ -37,8 +37,67 @@ class DerivativeThreader(threading.Thread):
 		except IOError: pass
 		return self.success
 
+class DerivativeSearch():
+	def __init__(self, params):
+		self.db = DB(db="derivatives")
+		self.params = None
+		
+		try:
+			self.q = params['keywords']
+			del params['keywords']
+		except KeyError as e:
+			print "no keyworkds specified"
+			
+		try:
+			self.geo = {
+				'latitude' : params['latitude'],
+				'longitude' : params['longitude']
+			}
+			
+			del params['latitude']
+			del params['longitude']
+		except KeyError as e:
+			print "no lat/lng specified"
+			
+		if hasattr(self, 'geo'):
+			try:
+				self.geo['radius'] = params['radius']
+				del params['radius']
+			except KeyError as e:
+				print "no radius for geo query.  setting default as 5km"
+				self.geo['radius'] = 5
+				
+		if any(params):
+			self.params = params
+			
+		self.derivatives = [False]
+		self.submissions = [False]
+		
+		if hasattr(self, 'geo') or hasattr(self, 'q') or self.params is not None:
+			self.perform()
+			
+	def perform(self):
+		if hasattr(self, 'q'):
+			self.derivatives = self.db.lucene_query("_design/textsearch/search_all",q=self.q, params=self.params)
+		else:
+			if self.params is not None:
+				self.derivatives = self.db.multiparam_query(self.params)
+				
+		if hasattr(self, 'geo'):
+			geos = self.db.geoquery(geo)
+			if len(self.derivatives) > 0 and self.derivatives[0]:
+				self.derivatives = list(set(self.derivatives).intersection(set(geos)))
+			else:
+				self.derivatives = geos
+		
+		if len(self.derivatives) > 0 and self.derivatives[0]:
+			submission_ids = self.db.query("_design/static/_view/getDerivatives", params={'_ids':self.derivatives}, include_only=["submission_id"], include_only_as_list=True)
+			
+			db = DB()
+			self.submissions = db.query("_design/submissions/_view/getSubmissions",params={'_ids':submission_ids})
+
 class Derivative(Asset):
-	def __init__(self, inflate=None, _id=None):
+	def __init__(self, inflate=None, _id=None, submission=None):
 		
 		super(Derivative, self).__init__(
 			inflate=inflate,
@@ -55,7 +114,11 @@ class Derivative(Asset):
 			return
 		
 		from submission import Submission
-		self.submission = Submission(_id=self.submission_id)
+		if submission is None:
+			self.submission = Submission(_id=self.submission_id)
+		else:
+			self.submission = submission
+			
 		j3m = open(
 			os.path.join(self.submission.asset_path, self.submission.j3m), 'r'
 		).read()

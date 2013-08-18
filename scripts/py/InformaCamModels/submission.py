@@ -1,5 +1,5 @@
 from asset import Asset, rt_
-from derivative import DerivativeThreader
+from derivative import DerivativeThreader, DerivativeSearch, Derivative
 from conf import assets_root, j3m, scripts_home
 import os, sys
 
@@ -13,7 +13,7 @@ class Submission(Asset):
 					'rt_' : rt_['submission']
 				}
 				
-		super(Submission, self).__init__(inflate, _id)
+		super(Submission, self).__init__(inflate, _id, extra_omits=['derivative'])
 		
 		if hasattr(self, 'invalid'):
 			return
@@ -22,6 +22,10 @@ class Submission(Asset):
 			pass
 		else:
 			super(Submission, self).makeDir("%ssubmissions/%s" % (assets_root, self._id))
+			
+		derivative_id = DerivativeSearch({'submissionID':self._id}).derivatives
+		if derivative_id[0]:
+			self.derivative = Derivative(_id=derivative_id[0], submission=self)
 			
 	def setMimeType(self, mime_type):
 		setattr(self, 'mime_type', mime_type)
