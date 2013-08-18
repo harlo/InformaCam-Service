@@ -127,6 +127,7 @@ class DB():
 		if q is not None:
 			view += q
 		
+		'''
 		if params is not None:
 			if q is not None:
 				view += " AND "
@@ -139,6 +140,7 @@ class DB():
 				view += " AND ".join(vals)
 			else:
 				view += vals[0]
+		'''
 		
 		print view
 		query = Wrapper(view, db="_fti/local/%s" % self.db_tag)
@@ -160,12 +162,33 @@ class DB():
 			except TypeError as e:
 				print e
 				pass
-
-			
+	
 		if len(results) == 0:
 			results.append(False)
-
+		else:
+			if params is not None:
+				extracted = self.multiparam_query(params)
+				if len(extracted) > 0 and extracted[0]:
+					results = list(set(results).intersection(set(extracted)))
+					
 		return list(set(results))
+		
+	def multiparam_query(self, params):
+		results = []
+		for key, val in params.iteritems():
+			viewName = "%s%s" % (key[0].capitalize(), key[1:])
+			extracted = self.query("_design/static/_view/getBy%s" % viewName, params={key:val}, include_only=['_id'], include_only_as_list=True)
+			
+			if len(extracted) > 0 and extracted[0]:
+				if len(results) > 0 and results[0]:
+					results = list(set(results).intersection(set(extracted)))
+				else:
+					results = extracted
+		
+		if len(results) > 0 and results[0]:		
+			return results
+		else:
+			return [False]
 		
 	def query(self, view, params = None, remove = None, include_only = None, include_only_as_list=False, sort=None):
 		# BTW params go in reverse alpha
@@ -234,6 +257,7 @@ class DB():
 				if include_only_as_list and len(include_only) == 1:
 					result_ = []
 					for res in result:
+						print res
 						result_.append(res[include_only[0]])
 					result = result_
 					

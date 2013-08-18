@@ -24,7 +24,7 @@
 			</li>
 			<li><a href="/sources/">Sources</a></li>
 			<li><a href="/submissions/">Submissions</a></li>
-			<li><a href="http://ec2-54-235-36-217.compute-1.amazonaws.com:8080">Documentation</a></li>
+			<li><a href="/documentation/">Documentation</a></li>
 		</ul>
 		
 		<div id="container">
@@ -33,6 +33,18 @@
 				<p>API Output: <a id="rd_control" onclick="expandOutput();">[expand]</a></p>
 				<textarea></textarea>
 			</div>
+			
+			<?php
+				$c = array_diff(explode("/", $_SERVER['REQUEST_URI']) ,array(""));
+				if($_SERVER['QUERY_STRING'] == "" && count($c) == 1) { ?>
+					<p>Filter: <a id="filter_control" onclick="expandFilter();">[expand]</a></p>
+					<div id="filter_holder"></div>
+					
+					<script>
+						setFilter('<?= str_replace("/","",$_SERVER['REQUEST_URI']) ?>');
+					</script>
+			<?php } ?>
+			
 			<?= $layout->dump ?>
 		
 			<div id="response_visualizer"></div>

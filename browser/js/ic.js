@@ -33,6 +33,51 @@ function expandOutput() {
 	}
 }
 
+function expandFilter() {
+	filter_control = $("#filter_holder");
+	
+	if(filter_control.css('display') == 'none') {
+		filter_control.css('display','block');
+		$("#filter_control").html('[hide]');
+	} else {
+		filter_control.css('display', 'none');
+		$("#filter_control").html('[expand]');
+	}
+}
+
+function setFilter(which) {
+	$.ajax({
+		url: "/layouts/" + which + "_filter.html",
+		dataType: "html",
+		success: function(html) {
+			$("#filter_holder").html(html);
+			$.each($("#filter_holder").find('input'), function() {
+				$(this).val($(this).attr('default'));
+			});
+		}
+	});
+}
+
+function clearFilter() {
+	$.each($("#filter_holder").find('input'), function() {
+		$(this).val($(this).attr('default'));
+	});
+}
+
+function filter(base) {
+	var params = [];
+	$.each($("#filter_holder").find('input'), function() {
+		if($(this).val() != $(this).attr('default')) {
+			params.push($(this).attr('rel') + "=" + $(this).val().replace(" ",","));
+		}
+	});
+	
+	if(params.length > 0) {
+		url = "/" + base + "/?" + params.join("&");
+		window.location = url;
+	}
+}
+
 function setJ3MDump(data) {
 	j3m_dump = data;
 }
@@ -78,6 +123,11 @@ function renderMedia(root) {
 				$(document.createElement('source'))
 					.attr('src', asset.replace('.mkv','.ogv'))
 					.prop('type', 'video/ogg')
+			);
+			media.append(
+				$(document.createElement('source'))
+					.attr('src', asset.replace('.mkv','.mp4'))
+					.prop('type', 'video/mp4')
 			);
 		} else if(asset.indexOf(".jpg") >= 0) {
 			media = $(document.createElement('img'))

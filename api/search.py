@@ -39,6 +39,8 @@ class Search():
 		derivatives = []
 		if q is not None:	
 			derivatives = self.db.lucene_query("_design/textsearch/search_all", q=q, params=params)
+		else:
+			derivatives = self.db.multiparam_query(params)
 			
 		if geo is not None:
 			geos = self.db.geoquery(geo)

@@ -123,7 +123,7 @@ def saveRawFile(destination, content):
 	file.close()
 	return True
 
-def passesParameterFilter(req):	
+def passesParameterFilter(req):
 	# looking for pipes
 	match = re.search(r'\s*\|\s*.+', req)
 	if match:
@@ -232,14 +232,14 @@ def GetTrueValue(str_value):
 		if int(str_value):
 			return 'int'
 	except ValueError as e:
-		print "GET TRUE VALUE ERROR: %s so i returned i try float " % e
+		#print "GET TRUE VALUE ERROR: %s so i returned i try float " % e
 		pass
 		
 	try:
 		if float(str_value):
 			return 'float'
 	except ValueError as e:
-		print "GET TRUE VALUE ERROR: %s so i returned i return str " % e
+		#print "GET TRUE VALUE ERROR: %s so i returned i return str " % e
 		pass
 		
 	return 'str'

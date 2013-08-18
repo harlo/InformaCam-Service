@@ -77,6 +77,7 @@ class Derivative(Asset):
 		from source import Source	
 		if _id is None:
 			setattr(self, 'date_created', self.j3m['genealogy']['dateCreated'])
+			setattr(self, 'mime_type', self.submission.mime_type)
 			self.save()
 			
 			fingerprint = None

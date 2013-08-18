@@ -1,0 +1,43 @@
+<ul>
+	<li>
+		<p>
+			Mime Type: <input rel="mimeType" default="ex: image/jpeg or video/matroska" class="filter" size="40" />
+		</p>
+	</li>
+	<li>
+		<p>
+			Keywords: <input rel="keywords" default="" class="filter" size="80" />
+		</p>
+	</li>
+	<li>
+		<p>
+			Location:
+			[ <input rel="latitude" class="filter" default="latitude" size="10" /> ,
+			<input rel="longitude" class="filter" default="longitude" size="10" /> ], 
+			radius (km) <input rel="radius" class="filter" default="5" size="3" />
+		</p>
+	</li>
+	<li>
+		<p>
+			Source ID: <input rel="sourceID" default="" class="filter" size="40" />
+		</p>
+	</li>
+	<li>
+		<p>
+			Cell Tower ID: <input rel="CellID" default="" class="filter" size="10" />
+		</p>
+	</li>
+	<li>
+		<p>
+			BSSID: <input rel="BSSID" default="ex: 00:06:5a:c0:ff:f9" class="filter" size="20" />
+		</p>
+	</li>
+	<li>
+		<p>
+			Nearby MAC Address: <input rel="MACAddress" default="ex: 00:06:5a:c0:ff:f9" class="filter" size="20" />
+		</p>
+	</li>
+</ul>
+<p>
+	<a onclick="filter('submissions');">Apply</a> or <a onclick="clearFilter();">Clear</a>
+</p>
