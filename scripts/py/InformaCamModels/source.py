@@ -4,6 +4,33 @@ from InformaCamUtils.funcs import ShellReader
 
 import gnupg, json
 
+class SourceSearch():
+	def __init__(self, params):
+		self.params = None
+		
+		try:
+			self.q = params['alias']
+			del params['alias']
+		except KeyError as e:
+			print "no alias specified"
+			
+		if any(params):
+			self.params = params
+			print self.params
+			
+		if hasattr(self, 'q') or self.params is not None:
+			self.perform()
+			
+	def perform(self):
+		from couch import DB
+		self.db = DB()
+		self.sources = []
+		
+		if hasattr(self, 'q'):
+			aliases = self.db.lucene_query("_design/sources/getSourceByAlias", q=self.q)
+			if len(aliases) > 0 and aliases[0]:
+				self.sources.extend(self.db.query("_design/sources/_view/getSources", params={'_ids':aliases}))
+
 class Source(Asset):
 	def __init__(self, inflate=None, _id=None):
 		if _id is None:

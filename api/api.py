@@ -19,10 +19,15 @@ class Sources(tornado.web.RequestHandler):
 		"""List all Sources in database"""
 		res = ServerResponse()
 
-		res.data = db.query(
-			"_design/sources/_view/getSources",
-			remove=['_rev','rt_']
-		)
+		if(len(self.request.query) > 3):
+			search = SourceSearch(parseRequest(self.request.query))
+			res.data = search.sources
+		else:
+			res.data = db.query(
+				"_design/sources/_view/getSources",
+				remove=['_rev','rt_']
+			)
+			
 		if len(res.data) > 0 and res.data[0]:
 			res.result = 200
 		else:
@@ -92,7 +97,10 @@ class Submissions(tornado.web.RequestHandler):
 		res = ServerResponse()
 		
 		if(len(self.request.query) > 3):
-			search = DerivativeSearch(parseRequest(self.request.query))			
+			search = DerivativeSearch(
+				parseRequest(self.request.query), 
+				remove=['_rev','rt_']
+			)			
 			res.data = search.submissions
 		else:
 			res.data = db.query(
@@ -157,6 +165,13 @@ class Submission(tornado.web.RequestHandler):
 				res.result = 200
 			else:
 				res.reason = submission.invalid
+				
+			if len(self.request.query) > 3:
+				with_query = submission.search(parseRequest(self.request.query))
+				res.data['refined_search'] = {}
+				
+				if hasattr(with_query, 'annotations'):
+					res.data['refined_search']['annotations'] = with_query.annotations
 
 		self.write(res.emit())
 
@@ -182,8 +197,8 @@ api = tornado.web.Application(routes)
 
 if __name__ == "__main__":
 	sys.path.insert(0, scripts_home['python'])
-	from InformaCamModels.source import Source as ICSource
-	from InformaCamModels.submission import Submission as ICSubmission
+	from InformaCamModels.source import Source as ICSource, SourceSearch
+	from InformaCamModels.submission import Submission as ICSubmission, SubmissionSearch
 	from InformaCamModels.derivative import DerivativeSearch
 	from InformaCamUtils.funcs import parseRequest, parseArguments, passesParameterFilter, gzipAsset
 	from InformaCamUtils.couch import DB

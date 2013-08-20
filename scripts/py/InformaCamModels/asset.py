@@ -25,8 +25,7 @@ class Asset():
 		
 		self.emit_omits = copy.deepcopy(emit_omits)
 		if extra_omits is not None:
-			for omit in extra_omits:
-				self.emit_omits.append(omit)
+			self.emit_omits.extend(extra_omits)
 		
 		if _id is None:
 			if inflate is not None:

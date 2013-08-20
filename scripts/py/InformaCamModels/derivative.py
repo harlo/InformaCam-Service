@@ -38,7 +38,7 @@ class DerivativeThreader(threading.Thread):
 		return self.success
 
 class DerivativeSearch():
-	def __init__(self, params):
+	def __init__(self, params, remove=None):
 		self.db = DB(db="derivatives")
 		self.params = None
 		
@@ -74,9 +74,9 @@ class DerivativeSearch():
 		self.submissions = [False]
 		
 		if hasattr(self, 'geo') or hasattr(self, 'q') or self.params is not None:
-			self.perform()
+			self.perform(remove=remove)
 			
-	def perform(self):
+	def perform(self, remove=None):
 		if hasattr(self, 'q'):
 			self.derivatives = self.db.lucene_query("_design/textsearch/search_all",q=self.q, params=self.params)
 		else:
@@ -94,7 +94,7 @@ class DerivativeSearch():
 			submission_ids = self.db.query("_design/static/_view/getDerivatives", params={'_ids':self.derivatives}, include_only=["submission_id"], include_only_as_list=True)
 			
 			db = DB()
-			self.submissions = db.query("_design/submissions/_view/getSubmissions",params={'_ids':submission_ids})
+			self.submissions = db.query("_design/submissions/_view/getSubmissions",params={'_ids':submission_ids}, remove=remove)
 
 class Derivative(Asset):
 	def __init__(self, inflate=None, _id=None, submission=None):
@@ -137,12 +137,21 @@ class Derivative(Asset):
 			)
 			return
 		
-		from source import Source	
+		self.getSource()
+			
 		if _id is None:
 			setattr(self, 'date_created', self.j3m['genealogy']['dateCreated'])
 			setattr(self, 'mime_type', self.submission.mime_type)
 			self.save()
 			
+			self.parseLocationEntries()
+			self.parseAnnotationEntries()
+			
+	def getSource(self):
+		from source import Source
+		if hasattr(self, 'source_id'):
+			self.source = Source(_id=self.source_id)
+		else:
 			fingerprint = None
 			try:
 				fingerprint = self.j3m['intent']['pgpKeyFingerprint'].lower()
@@ -183,11 +192,11 @@ class Derivative(Asset):
 			
 			setattr(self, 'source_id', self.source._id)
 			self.save()
-			
-			self.parseLocationEntries()
-			self.parseAnnotationEntries()
+		
+		if hasattr(self, 'source_id'):
+			return True
 		else:
-			self.source = Source(_id=self.source_id)
+			return False
 			
 	def parseLocationEntries(self):
 		print "parsing locations, bssids and cell tower ids; mac addresses (BT)"

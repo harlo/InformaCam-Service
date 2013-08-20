@@ -120,27 +120,49 @@ class DB():
 				result.append(False)
 		
 		return result
+	
+	def anno_query(self, view, _id, q):
+		view = "%s?q=%s&include_docs=true" % (view, q)
+
+		query = Wrapper(view, db="_fti/local/%s" % self.db_tag)
+		result = query.perform()
+		
+		results = []
+		
+		if type(result) == list:
+			for rows in result:
+				for row in rows['rows']:
+					try:
+				 		if row['doc']['submission_id'] == _id:
+							results.append({
+								'term': rows['q'].replace("default:", ""),
+								'index': row['fields']['anno_index'] 
+							})
+					except TypeError as e:
+						print e
+						continue
+		else:
+			for row in result['rows']:
+				try:
+					if row['doc']['submission_id'] == _id:
+						results.append({
+							'term': result['q'].replace("default:", ""), 
+							'index': row['fields']['anno_index']
+						})
+				except TypeError as e:
+					print e
+					continue
+		
+		if len(results) == 0:
+			results.append(False)
+			
+		return results	
 		
 	def lucene_query(self, view, q=None, params=None):
 		view = "%s?q=" % view
 		
 		if q is not None:
 			view += q
-		
-		'''
-		if params is not None:
-			if q is not None:
-				view += " AND "
-				
-			vals = []
-			for k, v in params.iteritems():
-				vals.append("%s:%s" % (k,v))
-				
-			if len(vals) > 1:
-				view += " AND ".join(vals)
-			else:
-				view += vals[0]
-		'''
 		
 		query = Wrapper(view, db="_fti/local/%s" % self.db_tag)
 		result = query.perform()
